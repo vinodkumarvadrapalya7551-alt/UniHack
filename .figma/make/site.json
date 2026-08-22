@@ -1,0 +1,10 @@
+{
+  "description": "Transform fragmented industrial product data into trusted, commerce-ready intelligence with an immersive 3D portfolio that enhances user engagement and decision-making.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
