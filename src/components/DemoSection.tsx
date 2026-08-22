@@ -275,7 +275,7 @@ export default function DemoSection() {
                   <div className="w-full max-w-xs glass rounded-xl p-4 min-h-[80px]">
                     <div className="mono text-xs text-slate-700 mb-2">SYSTEM LOG</div>
                     {step >= 0 && [
-                      `[${PROCESSING[step].id || "00"}] ${PROCESSING[step].label} — started`,
+                      `[${String(step + 1).padStart(2, "0")}] ${PROCESSING[step].label} — started`,
                       `worker-01 allocated · queue depth: ${Math.floor(Math.random() * 40 + 10)}`,
                       "embedding model v2.3 loaded",
                     ].map((l, i) => <LogLine key={`${step}-${i}`} text={l} delay={i * 0.15} />)}
