@@ -1,5 +1,139 @@
 import { useRef, useState, useEffect } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
+import emailjs from "@emailjs/browser";
+
+/* ── Early Access Modal ─────────────────────────────────── */
+function EarlyAccessModal({ onClose }: { onClose: () => void }) {
+  const [form, setForm] = useState({ name: "", place: "", email: "", phone: "" });
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("sending");
+    try {
+      await emailjs.send(
+        "service_unihack",
+        "template_unihack",
+        {
+          from_name: form.name,
+          place: form.place,
+          reply_to: form.email,
+          phone: form.phone,
+          to_email: "vinodkumarvadrapalya7551@gmail.com",
+        },
+        "YOUR_EMAILJS_PUBLIC_KEY"
+      );
+      setStatus("sent");
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
+
+      {/* Modal */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.92, y: 24 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.92, y: 24 }}
+        transition={{ type: "spring", stiffness: 260, damping: 22 }}
+        className="relative glass rounded-3xl p-8 w-full max-w-md glow-blue"
+      >
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full glass flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+        >
+          ✕
+        </button>
+
+        {status === "sent" ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-8"
+          >
+            <div className="text-5xl mb-4">🎉</div>
+            <h3 className="text-2xl font-bold gradient-text mb-2">Request Sent!</h3>
+            <p className="text-slate-400 text-sm">
+              We&apos;ll reach out to you at <span className="text-sky-400">{form.email}</span> shortly.
+            </p>
+            <button
+              onClick={onClose}
+              className="mt-6 px-6 py-2.5 rounded-xl text-sm font-semibold text-white"
+              style={{ background: "linear-gradient(135deg, #0ea5e9, #06b6d4)" }}
+            >
+              Close
+            </button>
+          </motion.div>
+        ) : (
+          <>
+            <div className="mb-6">
+              <div className="inline-flex items-center gap-2 glass-bright px-4 py-1.5 rounded-full mb-4">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+                <span className="mono text-xs text-sky-400 tracking-widest uppercase">Early Access</span>
+              </div>
+              <h3 className="text-2xl font-bold mb-1">Request Early Access</h3>
+              <p className="text-slate-400 text-sm">Fill in your details and we&apos;ll get back to you.</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {([
+                { name: "name",  label: "Full Name",    placeholder: "John Doe",          type: "text" },
+                { name: "place", label: "State / Place", placeholder: "e.g. Karnataka",   type: "text" },
+                { name: "email", label: "Email Address", placeholder: "you@company.com",  type: "email" },
+                { name: "phone", label: "Phone Number",  placeholder: "+91 98765 43210",  type: "tel" },
+              ] as { name: keyof typeof form; label: string; placeholder: string; type: string }[]).map((f) => (
+                <div key={f.name}>
+                  <label className="mono text-xs text-slate-500 tracking-wider block mb-1.5">{f.label}</label>
+                  <input
+                    required
+                    type={f.type}
+                    name={f.name}
+                    value={form[f.name]}
+                    onChange={handleChange}
+                    placeholder={f.placeholder}
+                    className="w-full bg-slate-900/60 border border-sky-900/40 focus:border-sky-500/60 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 outline-none transition-colors"
+                  />
+                </div>
+              ))}
+
+              {status === "error" && (
+                <p className="mono text-xs text-red-400">Something went wrong. Please try again.</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={status === "sending"}
+                className="w-full py-3.5 rounded-xl font-semibold text-white transition-all duration-300 hover:scale-[1.02] disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{ background: "linear-gradient(135deg, #0ea5e9, #06b6d4)" }}
+              >
+                {status === "sending" ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Sending...
+                  </span>
+                ) : "Submit Request"}
+              </button>
+            </form>
+          </>
+        )}
+      </motion.div>
+    </div>
+  );
+}
 
 function ScaleCounter({ inView }: { inView: boolean }) {
   const [count, setCount] = useState(1);
@@ -112,6 +246,7 @@ export default function ScaleSection() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [hoveredCat, setHoveredCat] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <section className="relative py-32 overflow-hidden" id="scale" ref={ref}>
@@ -221,18 +356,26 @@ export default function ScaleSection() {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <button
+                onClick={() => setShowModal(true)}
                 className="px-10 py-4 rounded-xl font-semibold text-white relative overflow-hidden group transition-all duration-300 hover:scale-105"
                 style={{ background: "linear-gradient(135deg, #0ea5e9, #06b6d4)" }}
               >
                 <span className="relative z-10">Request Early Access</span>
               </button>
-              <button className="px-10 py-4 rounded-xl font-semibold text-slate-300 glass hover:text-white transition-all">
+              <button
+                onClick={() => setShowModal(true)}
+                className="px-10 py-4 rounded-xl font-semibold text-slate-300 glass hover:text-white transition-all"
+              >
                 Schedule a Demo
               </button>
             </div>
           </div>
         </motion.div>
       </div>
+
+      <AnimatePresence>
+        {showModal && <EarlyAccessModal onClose={() => setShowModal(false)} />}
+      </AnimatePresence>
     </section>
   );
 }

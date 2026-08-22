@@ -45,6 +45,9 @@ export default function DemoSection() {
   const [phase, setPhase] = useState<"idle" | "running" | "done">("idle");
   const [step, setStep] = useState(-1);
   const [progress, setProgress] = useState(0);
+  const [input, setInput] = useState({ part_number: "HP-450", brand: "ABC Industries", category: "Industrial Hydraulic Pump" });
+
+  const isEditable = phase === "idle";
 
   async function run() {
     setPhase("running");
@@ -113,14 +116,31 @@ export default function DemoSection() {
             <div className="glass rounded-2xl overflow-hidden">
               <div className="flex items-center justify-between px-6 py-4 border-b border-sky-900/20">
                 <span className="mono text-xs text-sky-400 tracking-wider">INPUT PAYLOAD</span>
-                <span className="mono text-xs text-slate-600">application/json</span>
+                <span className="mono text-xs text-slate-600">
+                  {isEditable ? "editable" : "application/json"}
+                </span>
               </div>
-              <div className="p-6 font-mono text-sm space-y-2">
-                <div className="text-slate-500">{"{"}</div>
-                <div className="pl-4"><span className="text-violet-400">&quot;part_number&quot;</span><span className="text-slate-500">: </span><span className="text-emerald-400">&quot;HP-450&quot;</span><span className="text-slate-600">,</span></div>
-                <div className="pl-4"><span className="text-violet-400">&quot;brand&quot;</span><span className="text-slate-500">: </span><span className="text-emerald-400">&quot;ABC Industries&quot;</span><span className="text-slate-600">,</span></div>
-                <div className="pl-4"><span className="text-violet-400">&quot;category&quot;</span><span className="text-slate-500">: </span><span className="text-emerald-400">&quot;Industrial Hydraulic Pump&quot;</span></div>
-                <div className="text-slate-500">{"}"}</div>
+              <div className="p-6 font-mono text-sm space-y-3">
+                <div className="text-slate-500">&#123;</div>
+                {(["part_number", "brand", "category"] as const).map((field, idx, arr) => (
+                  <div key={field} className="pl-4 flex items-center gap-1 flex-wrap">
+                    <span className="text-violet-400">&quot;{field}&quot;</span>
+                    <span className="text-slate-500">: &quot;</span>
+                    {isEditable ? (
+                      <input
+                        value={input[field]}
+                        onChange={(e) => setInput((prev) => ({ ...prev, [field]: e.target.value }))}
+                        className="bg-transparent text-emerald-400 outline-none border-b border-emerald-500/40 focus:border-emerald-400 transition-colors"
+                        style={{ minWidth: "4ch", width: `${Math.max(input[field].length, 4)}ch` }}
+                        spellCheck={false}
+                      />
+                    ) : (
+                      <span className="text-emerald-400">{input[field]}</span>
+                    )}
+                    <span className="text-slate-500">&quot;{idx < arr.length - 1 ? "," : ""}</span>
+                  </div>
+                ))}
+                <div className="text-slate-500">&#125;</div>
               </div>
             </div>
 
@@ -270,7 +290,7 @@ export default function DemoSection() {
                   <div className="flex items-center justify-between px-6 py-4 border-b border-sky-900/25">
                     <div>
                       <div className="mono text-xs text-sky-400 mb-1 tracking-wider">INTELLIGENCE REPORT</div>
-                      <div className="font-bold">{OUTPUT.id} — {OUTPUT.brand}</div>
+                      <div className="font-bold">{input.part_number} — {input.brand}</div>
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-1.5 justify-end mb-1">
