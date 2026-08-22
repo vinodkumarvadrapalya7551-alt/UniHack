@@ -1,7 +1,11 @@
 {
-  "description": "Transform fragmented industrial product data into trusted, commerce-ready intelligence with an immersive 3D portfolio that enhances user engagement and decision-making.",
+  "title": "UniHack — AI Product Intelligence Platform",
+  "description": "Transform fragmented industrial product data into trusted, commerce-ready intelligence with UniHack's 9-step AI pipeline.",
+  "openGraph": {
+    "image": "https://og-image-generator.vercel.app/api/og?title=UniHack&subtitle=AI+Product+Intelligence+Platform&theme=dark"
+  },
   "robots": {
-    "index": false
+    "index": true
   },
   "accessibility": {
     "addBypassLinks": false,
